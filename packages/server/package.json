@@ -7,14 +7,18 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hono/node-server": "^1.8.0",
+    "cheerio": "^1.2.0",
     "hono": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "tsx": "^4.7.0"
+    "tsx": "^4.7.0",
+    "vitest": "^4.0.18"
   }
 }

@@ -1,7 +1,11 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
+import scraperRoutes from './routes/scraper.js';
 
 const app = new Hono();
+
+// Register scraper routes
+app.route('/api', scraperRoutes);
 
 // Health check endpoint
 app.get('/api/health', (c) => {
