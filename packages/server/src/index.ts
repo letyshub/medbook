@@ -21,7 +21,7 @@ app.get('/api', (c) => {
   return c.json({ message: 'Medium to eBook API' });
 });
 
-const port = 3001;
+const port = Number(process.env.PORT || process.env.SERVER_PORT || 3001);
 
 console.log(`Server running on http://localhost:${port}`);
 
