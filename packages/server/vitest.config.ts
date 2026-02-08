@@ -8,7 +8,11 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: ['src/scraper/**/*.ts'],
+      include: [
+        'src/scraper/**/*.ts',
+        'src/generators/**/*.ts',
+        'src/routes/**/*.ts',
+      ],
       exclude: ['src/**/*.test.ts'],
     },
   },

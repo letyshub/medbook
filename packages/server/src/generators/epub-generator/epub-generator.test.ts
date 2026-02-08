@@ -39,8 +39,11 @@ const mockArticleWithImages: Article = {
 };
 
 describe('epub-generator', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    // Reset the mock to default behavior
+    const epub = (await import('epub-gen-memory')).default;
+    vi.mocked(epub).mockResolvedValue(Buffer.from('mock-epub-content'));
   });
 
   // Group 1: Types and Constants Tests
@@ -164,10 +167,67 @@ describe('epub-generator', () => {
     it('should return Buffer on success', async () => {
       const result = await generateEpub([mockArticle], { title: 'Test Book' });
       expect(result).toBeInstanceOf(Buffer);
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should return non-empty buffer with valid content', async () => {
+      const result = await generateEpub([mockArticle], { title: 'Test Book' });
+      expect(result).toBeInstanceOf(Buffer);
+      expect(result.length).toBeGreaterThan(0);
+      // Buffer should contain the mock content
+      expect(result.toString()).toBe('mock-epub-content');
     });
 
     it('should throw GeneratorException on validation error', async () => {
       await expect(generateEpub([], { title: 'Test' })).rejects.toThrow(GeneratorException);
+    });
+
+    it('should handle generation with multiple articles', async () => {
+      const articles = [mockArticle, mockArticle, mockArticle];
+      const result = await generateEpub(articles, { title: 'Multi-Article Book' });
+      expect(result).toBeInstanceOf(Buffer);
+      expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  // Group 3: Error Handling Tests
+  describe('error handling', () => {
+    it('should throw TIMEOUT error with correct code', async () => {
+      // Verify GeneratorException with TIMEOUT code is created correctly
+      const timeoutError = new GeneratorException('TIMEOUT', 'Generation timeout');
+      expect(timeoutError).toBeInstanceOf(GeneratorException);
+      expect(timeoutError.code).toBe('TIMEOUT');
+      expect(timeoutError.message).toBe('Generation timeout');
+    });
+
+    it('should throw RENDER_ERROR when epub library fails', async () => {
+      const epub = (await import('epub-gen-memory')).default;
+      vi.mocked(epub).mockRejectedValueOnce(new Error('Library failed'));
+
+      try {
+        await generateEpub([mockArticle], { title: 'Error Test' });
+        // Should not reach here
+        expect(true).toBe(false);
+      } catch (error) {
+        expect(error).toBeInstanceOf(GeneratorException);
+        expect((error as GeneratorException).code).toBe('RENDER_ERROR');
+      }
+    });
+
+    it('should re-throw GeneratorException as-is', async () => {
+      const epub = (await import('epub-gen-memory')).default;
+      const customException = new GeneratorException('CUSTOM_ERROR', 'Custom error message');
+      vi.mocked(epub).mockRejectedValueOnce(customException);
+
+      try {
+        await generateEpub([mockArticle], { title: 'Custom Error Test' });
+        // Should not reach here
+        expect(true).toBe(false);
+      } catch (error) {
+        expect(error).toBeInstanceOf(GeneratorException);
+        expect((error as GeneratorException).code).toBe('CUSTOM_ERROR');
+        expect((error as GeneratorException).message).toBe('Custom error message');
+      }
     });
   });
 

@@ -99,6 +99,16 @@ describe('pdf-generator', () => {
       const result = await generatePdf([mockArticle], { title: 'Test eBook' });
 
       expect(result).toBeInstanceOf(Buffer);
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('returns non-empty buffer with valid content', async () => {
+      const result = await generatePdf([mockArticle], { title: 'Test eBook' });
+
+      expect(result).toBeInstanceOf(Buffer);
+      expect(result.length).toBeGreaterThan(0);
+      // Buffer should contain the mock content
+      expect(result.toString()).toBe('mock pdf content');
     });
 
     it('launches puppeteer with correct options', async () => {

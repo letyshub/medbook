@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { scrapeArticle } from './medium-scraper.js';
 import { ScraperException } from './types.js';
+
+// Fixture loading utility
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const loadFixture = (name: string): string => {
+  return readFileSync(join(__dirname, '__fixtures__', name), 'utf-8');
+};
 
 describe('medium-scraper', () => {
   beforeEach(() => {
@@ -263,6 +272,84 @@ describe('medium-scraper', () => {
 
         await expect(scrapeArticle(url)).resolves.toBeDefined();
       }
+    });
+  });
+
+  // Fixture-based tests
+  describe('fixture-based parsing', () => {
+    it('parses basic Medium article from fixture', async () => {
+      const fixtureHtml = loadFixture('medium-article-basic.html');
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve(fixtureHtml),
+      } as Response);
+
+      const article = await scrapeArticle('https://medium.com/@user/basic-article');
+
+      expect(article.title).toBe('Understanding TypeScript Generics');
+      expect(article.author).toBe('Jane Developer');
+      expect(article.publishedDate).toBe('2026-02-01T10:30:00.000Z');
+      expect(article.content).toContain('TypeScript generics');
+    });
+
+    it('detects paywall from fixture', async () => {
+      const fixtureHtml = loadFixture('medium-article-paywall.html');
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve(fixtureHtml),
+      } as Response);
+
+      try {
+        await scrapeArticle('https://medium.com/@user/paywall-article');
+        expect(true).toBe(false); // Should not reach here
+      } catch (error) {
+        expect(error).toBeInstanceOf(ScraperException);
+        expect((error as ScraperException).code).toBe('PAYWALL');
+      }
+    });
+
+    it('extracts images from fixture', async () => {
+      const fixtureHtml = loadFixture('medium-article-images.html');
+
+      vi.mocked(fetch).mockImplementation((url) => {
+        if (typeof url === 'string' && url.includes('medium.com/@')) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            text: () => Promise.resolve(fixtureHtml),
+          } as Response);
+        }
+        // Mock image fetch (return failure to skip image download)
+        return Promise.resolve({ ok: false } as Response);
+      });
+
+      const article = await scrapeArticle('https://medium.com/@user/images-article');
+
+      expect(article.title).toBe('Building Beautiful UIs with React');
+      expect(article.content).toBeDefined();
+      // The content should reference images
+      expect(article.content).toContain('img');
+    });
+
+    it('preserves code blocks from fixture', async () => {
+      const fixtureHtml = loadFixture('medium-article-code.html');
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve(fixtureHtml),
+      } as Response);
+
+      const article = await scrapeArticle('https://medium.com/@user/code-article');
+
+      expect(article.title).toBe('TypeScript Best Practices: Code Examples');
+      expect(article.author).toBe('Code Blogger');
+      expect(article.content).toContain('pre');
+      expect(article.content).toContain('code');
     });
   });
 });

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="author" content="Code Blogger">
+  <meta property="article:published_time" content="2026-01-25T16:45:00.000Z">
+  <meta name="description" content="A technical tutorial with code examples">
+  <title>TypeScript Best Practices: Code Examples</title>
+</head>
+<body>
+  <div class="articleContent">
+    <article data-post-id="code456">
+      <header>
+        <h1 data-testid="storyTitle">TypeScript Best Practices: Code Examples</h1>
+        <h2 class="pw-subtitle-paragraph">Improve your TypeScript skills with practical examples</h2>
+        <div class="pw-author">
+          <a rel="author" href="/@codeblogger">Code Blogger</a>
+        </div>
+        <time datetime="2026-01-25T16:45:00.000Z">Jan 25, 2026</time>
+        <span class="pw-reading-time">10 min read</span>
+      </header>
+
+      <section data-field="body">
+        <div class="section-content">
+          <p class="pw-post-body-paragraph">
+            TypeScript brings static typing to JavaScript, making your code more robust and maintainable. Let's explore some best practices.
+          </p>
+
+          <h2>Type Inference</h2>
+          <p class="pw-post-body-paragraph">
+            TypeScript can infer types automatically in many cases:
+          </p>
+
+          <pre class="pw-code-block" data-lang="typescript"><code class="language-typescript">// TypeScript infers the type as string
+const greeting = "Hello, World!";
+
+// Explicit typing when needed
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+function getUser(id: number): User {
+  return {
+    id,
+    name: "John Doe",
+    email: "john@example.com"
+  };
+}</code></pre>
+
+          <h2>Generics</h2>
+          <p class="pw-post-body-paragraph">
+            Generics allow you to write reusable, type-safe code:
+          </p>
+
+          <pre class="pw-code-block" data-lang="typescript"><code class="language-typescript">// Generic function
+function wrapInArray&lt;T&gt;(value: T): T[] {
+  return [value];
+}
+
+// Usage
+const numbers = wrapInArray(42);    // number[]
+const strings = wrapInArray("hi");  // string[]
+
+// Generic interface
+interface ApiResponse&lt;T&gt; {
+  data: T;
+  status: number;
+  message: string;
+}</code></pre>
+
+          <h2>Union Types</h2>
+          <p class="pw-post-body-paragraph">
+            Union types let you handle multiple possible types:
+          </p>
+
+          <pre class="pw-code-block" data-lang="typescript"><code class="language-typescript">type Result =
+  | { success: true; data: string }
+  | { success: false; error: Error };
+
+function handleResult(result: Result) {
+  if (result.success) {
+    console.log(result.data);
+  } else {
+    console.error(result.error.message);
+  }
+}</code></pre>
+
+          <h2>Utility Types</h2>
+          <p class="pw-post-body-paragraph">
+            TypeScript provides built-in utility types for common transformations:
+          </p>
+
+          <pre class="pw-code-block" data-lang="typescript"><code class="language-typescript">interface Article {
+  title: string;
+  content: string;
+  author: string;
+  publishedAt: Date;
+}
+
+// Make all properties optional
+type DraftArticle = Partial&lt;Article&gt;;
+
+// Make all properties required
+type CompleteArticle = Required&lt;Article&gt;;
+
+// Pick specific properties
+type ArticlePreview = Pick&lt;Article, "title" | "author"&gt;;</code></pre>
+
+          <h2>Conclusion</h2>
+          <p class="pw-post-body-paragraph">
+            These TypeScript best practices will help you write cleaner, more maintainable code. Remember to leverage type inference where possible and use generics for reusable components.
+          </p>
+        </div>
+      </section>
+
+      <footer>
+        <div class="pw-tags">
+          <a href="/tag/typescript">TypeScript</a>
+          <a href="/tag/programming">Programming</a>
+          <a href="/tag/javascript">JavaScript</a>
+        </div>
+      </footer>
+    </article>
+  </div>
+</body>
+</html>
